@@ -132,8 +132,18 @@ describe("Snowball-benefit tests", function () {
     //console.log(usage);
     console.log(sig);
     return { record, sig, contract };
-  }     
+  } 
+  
+  async function benefitFixture() {
+    let chainId = 1;
+    let nftContract = '0x6466514368A0c2E1396BC3164495c6f90cBA92F6';
+    let expiration = Math.floor(Date.now() / 1000) + 60*60*24*39 //30day
+    let maxUsage = 1;
+    let content = 'Sample1 Event Ticket';
+    await contract.connect(operator1).registerBenefit(chainId, nftContract, expiration, maxUsage, content);
 
+    return { contract };
+  }     
 
   it("verifyBenefitSig should be verified", async function () {
 
@@ -145,6 +155,17 @@ describe("Snowball-benefit tests", function () {
     expect(verificationResult).to.be.true;
   });    
 
+  it("verifyBenefitSig should not be verified when any element changed", async function () {
+
+    let { benefit, sig, contract } = await loadFixture(benefitSigFixture);
+    let b = benefit;
+    //console.log(b);
+    //console.log(sig);
+    let verificationResult = await contract.verifyBenefitSig(2, b.nftContract, b.expiration, b.maxUsage, b.content, b.operator, b.deadline, b.nonce, sig);
+    expect(verificationResult).to.be.false;
+  });  
+
+
   it("verifyUsageSig should be verified", async function () {
 
     let { usage, sig, contract } = await loadFixture(usageSigFixture);
@@ -153,18 +174,130 @@ describe("Snowball-benefit tests", function () {
     //console.log(sig);
     let verificationResult = await contract.verifyUsageSig(u.user, u.benefitId, u.nftId, u.deadline, u.nonce, sig);
     expect(verificationResult).to.be.true;
-  });      
+  });  
+  
+  it("verifyUsageSig should not be verified when any element changed", async function () {
+
+    let { usage, sig, contract } = await loadFixture(usageSigFixture);
+    let u = usage;
+    //console.log(u);
+    //console.log(sig);
+    let verificationResult = await contract.verifyUsageSig(u.user, u.benefitId, u.nftId, u.deadline, 4, sig);
+    expect(verificationResult).to.be.false;
+  });   
 
   it("verifyRecordSig should be verified", async function () {
 
     let { record, sig, contract } = await loadFixture(recordSigFixture);
     let u = record;
-    console.log(u);
-    console.log(sig);
+    //console.log(u);
+    //console.log(sig);
     let verificationResult = await contract.verifyRecordSig(u.benefitId, u.operator, u.deadline, u.nonce, sig);
     expect(verificationResult).to.be.true;
+  });  
+
+  it("verifyRecordSig should not be verified when any element changed", async function () {
+
+    let { record, sig, contract } = await loadFixture(recordSigFixture);
+    let u = record;
+    //console.log(u);
+    //console.log(sig);
+    let verificationResult = await contract.verifyRecordSig(u.benefitId, u.operator, u.deadline, 4, sig);
+    expect(verificationResult).to.be.false;
+  });  
+
+  
+  it("registerBenefit() should work", async function () {
+    let chainId = 1;
+    let nftContract = '0x6466514368A0c2E1396BC3164495c6f90cBA92F6';
+    let expiration = Math.floor(Date.now() / 1000) + 60*60*24*39 //30day
+    let maxUsage = 1;
+    let content = 'Sample1 Event Ticket';
+    await contract.connect(operator1).registerBenefit(chainId, nftContract, expiration, maxUsage, content);
+    let benefit = await contract.benefits(1);
+    expect(benefit[0]).to.equal(1);
+  }); 
+
+  it("realyRegisterBenefit() should work", async function () {
+    let { benefit, sig, contract } = await loadFixture(benefitSigFixture);
+    let b = benefit;
+    //console.log(b);
+    //console.log(sig);
+    let verificationResult = await contract.verifyBenefitSig(b.chainId, b.nftContract, b.expiration, b.maxUsage, b.content, b.operator, b.deadline, b.nonce, sig);
+    await contract.relayRegisterBenefit(b.chainId, b.nftContract, b.expiration, b.maxUsage, b.content, b.operator, b.deadline, b.nonce, sig)
+    let benefit1 = await contract.benefits(1);
+    expect(benefit1[0]).to.equal(1);
+  });   
+
+  it("recordUsage() should work", async function () {
+    let { contract } = await loadFixture(benefitFixture);
+
+    let [ name, version, chainId, verifyingContract ] = await contract.getDomainInfo();
+    chainId = parseInt(chainId);
+
+    let user = user1.address; 
+    let benefitId = 1;
+    let nftId = 100;
+    let deadline = Math.floor(Date.now() / 1000) + 60*60*24; //1day    
+    let nonce = parseInt(await (contract.nonces(user)));    
+    
+    let domain = { name, version, chainId, verifyingContract };
+    let types = { Usage: [
+                            {name: 'user', type: 'address'},
+                            {name: 'benefitId', type: 'uint32'},
+                            {name: 'nftId', type: 'uint32'},
+                            {name: 'deadline', type: 'uint256'},
+                            {name: 'nonce', type: 'uint256'}                                                                                 
+                          ]};
+    let usage = { user, benefitId, nftId, deadline, nonce };
+    let sig = await user1.signTypedData(domain, types, usage);
+    await contract.connect(operator1).recordUsage(user, benefitId, nftId, deadline, nonce, sig);
+    let usage1 = await contract.usages(1);
+    console.log(usage1);
+    expect(usage1[0]).to.equal(1);
   });      
 
+  it("relayRecordUsage() should work", async function () {
+    let { contract } = await loadFixture(benefitFixture);
+
+    let [ name, version, chainId, verifyingContract ] = await contract.getDomainInfo();
+    chainId = parseInt(chainId);
+
+    let user = user1.address; 
+    let benefitId = 1;
+    let nftId = 100;
+    let deadline = Math.floor(Date.now() / 1000) + 60*60*24; //1day    
+    let nonce = parseInt(await (contract.nonces(user)));    
+    
+    let domain = { name, version, chainId, verifyingContract };
+    let types = { Usage: [
+                            {name: 'user', type: 'address'},
+                            {name: 'benefitId', type: 'uint32'},
+                            {name: 'nftId', type: 'uint32'},
+                            {name: 'deadline', type: 'uint256'},
+                            {name: 'nonce', type: 'uint256'}                                                                                 
+                          ]};
+    let usage = { user, benefitId, nftId, deadline, nonce };
+    let sig = await user1.signTypedData(domain, types, usage);
+  
+    let operator = operator1.address;
+    let opDeadline = Math.floor(Date.now() / 1000) + 60*60*24; //1day    
+    let opNonce = parseInt(await (contract.nonces(operator)));    
+    
+    let opTypes = { Record: [
+                            {name: 'benefitId', type: 'uint32'},
+                            {name: 'operator', type: 'address'},
+                            {name: 'deadline', type: 'uint256'},
+                            {name: 'nonce', type: 'uint256'}                                                                                 
+                          ]};
+    let record = { benefitId, operator, deadline, nonce };
+    let opSig = await operator1.signTypedData(domain, opTypes, record);
+
+    await contract.connect(relayer).relayRecordUsage(user, benefitId, nftId, deadline, nonce, sig, operator, opDeadline, opNonce, opSig);
+    let usage1 = await contract.usages(1);
+    console.log(usage1);
+    expect(usage1[0]).to.equal(1);
+  });      
 });
 
 

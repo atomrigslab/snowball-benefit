@@ -23,7 +23,7 @@ contract SnowballBenefit {
         uint32 expiration;
         uint8 maxUsage;
         address operator;
-        string message;       
+        string content;       
     }    
 
     struct Usage {
@@ -42,12 +42,42 @@ contract SnowballBenefit {
 
     event BenefitRegistered(uint32 benefitId);
     event BenefitUsed(uint32 benefitId, uint64 usageId, address user);
+    event OwnershipTransfered(address newOwner);
+    event SetAdmin(address newAdmin);
+
+    modifier onlyOwner() {
+        require(_owner == msg.sender, "Benefit: caller is not the owner address!");
+        _;
+    }
+
+    modifier onlyAdmin() {
+        require(_admin == msg.sender || _owner == msg.sender, "Benefit: caller is not the admin address!");
+        _;
+    }             
 
     function initialize() public {
         require(_owner == address(0), "Benefit: already initialized"); 
         _owner = msg.sender;            
         _setDomainSeparator();
     }
+
+    function transferOwnership(address _newOwner) external onlyOwner {
+        _owner = _newOwner;
+        emit OwnershipTransfered(_newOwner);
+    }
+
+    function setAdmin(address _newAdmin) external onlyOwner {
+        _admin = _newAdmin;
+        emit SetAdmin(_newAdmin);
+    }
+
+    function getOwner() public view returns (address) {
+        return _owner;
+    }    
+
+    function getAdmin() public view returns (address) {
+        return _admin;
+    }    
 
     function getVersion() public pure returns (string memory) {
         return "1";
