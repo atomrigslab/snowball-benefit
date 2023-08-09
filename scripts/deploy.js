@@ -40,7 +40,7 @@ async function main() {
   console.log('proxy contract deployed at ', await proxy.getAddress());
   const implementation = await beacon.implementation()
   console.log('implementation contract deployed at ', implementation);
-  //await hre.run("verify:verify", { address: implementation });
+  await hre.run("verify:verify", { address: implementation });
 
 }
 

@@ -398,4 +398,36 @@ contract SnowballBenefit {
         require(operator == benefit.operator, "Benefit: sender is not the benefit operator");        
         _recordUsage(user, benefitId, nftId, deadline, nonce, sig);
     }
+
+    function getAllBenefits(address nftAddr) public view returns (Benefit[] memory) {
+        uint32[] memory benefitIds = benefitIdsByNft[nftAddr];
+        uint256 length = benefitIds.length;
+        Benefit[] memory allBenefits = new Benefit[](benefitIds.length);
+        for (uint256 i = 0; i < length; i++ ) {
+            Benefit memory benefit = benefits[benefitIds[i]];
+            allBenefits[i] = benefit;
+        }
+        return allBenefits;
+    }
+
+    function getActiveBenefits(address nftAddr) public view returns (Benefit[] memory) {
+        Benefit[] memory allBenefits = getAllBenefits(nftAddr);
+        uint256 length = allBenefits.length;
+        uint256 activeCount;
+        for (uint256 i = 0; i < length; i++ ) {
+            Benefit memory benefit = allBenefits[i];
+            if (benefit.expiration > block.timestamp) {
+                activeCount += 1;
+            }
+        }
+        Benefit[] memory activeBenefits = new Benefit[](activeCount);        
+        for (uint256 i = 0; i < length; i++ ) {
+            uint256 j;
+            Benefit memory benefit = allBenefits[i];
+            if (benefit.expiration > block.timestamp) {
+                activeBenefits[j++] = benefit;
+            }
+        }        
+        return activeBenefits;
+    }
 }
