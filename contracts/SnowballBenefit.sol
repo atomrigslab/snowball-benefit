@@ -421,8 +421,9 @@ contract SnowballBenefit {
             }
         }
         Benefit[] memory activeBenefits = new Benefit[](activeCount);        
+        
+        uint256 j;
         for (uint256 i = 0; i < length; i++ ) {
-            uint256 j;
             Benefit memory benefit = allBenefits[i];
             if (benefit.expiration > block.timestamp) {
                 activeBenefits[j++] = benefit;
