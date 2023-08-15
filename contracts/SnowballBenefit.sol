@@ -402,7 +402,7 @@ contract SnowballBenefit {
     function getAllBenefits(address nftAddr) public view returns (Benefit[] memory) {
         uint32[] memory benefitIds = benefitIdsByNft[nftAddr];
         uint256 length = benefitIds.length;
-        Benefit[] memory allBenefits = new Benefit[](benefitIds.length);
+        Benefit[] memory allBenefits = new Benefit[](length);
         for (uint256 i = 0; i < length; i++ ) {
             Benefit memory benefit = benefits[benefitIds[i]];
             allBenefits[i] = benefit;
@@ -421,7 +421,7 @@ contract SnowballBenefit {
             }
         }
         Benefit[] memory activeBenefits = new Benefit[](activeCount);        
-        
+
         uint256 j;
         for (uint256 i = 0; i < length; i++ ) {
             Benefit memory benefit = allBenefits[i];
