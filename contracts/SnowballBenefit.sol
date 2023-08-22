@@ -7,7 +7,7 @@ pragma solidity ^0.8.18;
  *
  **/
 
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
 contract SnowballBenefit {
 
@@ -18,6 +18,7 @@ contract SnowballBenefit {
     bytes32 public DOMAIN_SEPARATOR;    
 
     struct Benefit {
+        uint32 benefitId;
         uint32 chainId;
         address nftContract;
         uint32 expiration;
@@ -27,6 +28,7 @@ contract SnowballBenefit {
     }    
 
     struct Usage {
+        uint64 usageId;
         uint32 benefitId;
         uint32 nftId;
         address user;
@@ -292,6 +294,7 @@ contract SnowballBenefit {
         _benefitId++;
         benefits[_benefitId] = 
             Benefit(
+                _benefitId,
                 chainId,
                 nftContract,
                 expiration,
@@ -355,6 +358,7 @@ contract SnowballBenefit {
         _usageId++;
         usages[_usageId] = 
             Usage(
+                _usageId,
                 benefitId,
                 nftId,
                 user
