@@ -22,6 +22,21 @@ const getFeeOption = async () => {
   }
 }
 
+//wait for n blocks
+const waitBlocks = async (n) => {
+  const currentBlock = await provider.getBlockNumber()
+  const targetBlock = currentBlock + n
+  return new Promise((resolve, reject) => {
+    provider.on("block", (blockNumber) => {
+      console.log("blockNumber: ", blockNumber)
+      if (blockNumber == targetBlock) {
+        provider.removeAllListeners("block");
+        resolve();
+      }
+    })
+  })
+}
+
 async function main() {
 
   const Contract = await ethers.getContractFactory("SnowballBenefit");
@@ -40,6 +55,7 @@ async function main() {
   console.log('proxy contract deployed at ', await proxy.getAddress());
   const implementation = await beacon.implementation()
   console.log('implementation contract deployed at ', implementation);
+  await waitBlocks(5)
   await hre.run("verify:verify", { address: implementation });
 
 }
