@@ -1,6 +1,8 @@
+require("dotenv").config({ path: "./.env" });
 require("@nomicfoundation/hardhat-toolbox");
-require('@openzeppelin/hardhat-upgrades');
-require('dotenv').config()
+require("@openzeppelin/hardhat-upgrades");
+
+const { DEV_PK, MNEMONIC } = process.env;
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -9,63 +11,45 @@ module.exports = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
-      }
-    }
+        runs: 200,
+      },
+    },
   },
   defaultNetwork: "hardhat",
   networks: {
-    hardhat: {
-      accounts: {
-        mnemonic: process.env.MNEMONIC
-      }
+    hardhat: {},
+    // sepolia: {
+    //   url:
+    //     "https://eth-sepolia.g.alchemy.com/v2/" + process.env.ALCHEMY_API_KEY,
+    //   accounts: {
+    //     accounts: DEV_PK !== undefined ? [DEV_PK] : [],
+    //   },
+    // },
+    goerli: {
+      url: "https://eth-goerli.g.alchemy.com/v2/" + process.env.ALCHEMY_API_KEY,
+      accounts: DEV_PK !== undefined ? [DEV_PK] : [],
     },
-    
-    sepolia: {
-      url: 'https://eth-sepolia.g.alchemy.com/v2/' + process.env.ALCHEMY_API_KEY,
-      accounts: {
-        mnemonic: process.env.MNEMONIC,
-      }
+    polygonMumbai: {
+      url:
+        "https://polygon-mumbai.g.alchemy.com/v2/" +
+        process.env.ALCHEMY_API_KEY,
+      accounts: DEV_PK !== undefined ? [DEV_PK] : [],
     },
-    mumbai: {
-      url: 'https://polygon-mumbai.g.alchemy.com/v2/' + process.env.ALCHEMY_API_KEY,
-      accounts: {
-        mnemonic: process.env.MNEMONIC,
-      }
-    },
-
     polygon: {
-      url: 'https://polygon.g.alchemy.com/v2/' + process.env.ALCHEMY_API_KEY,
-      accounts: {
-        mnemonic: process.env.MNEMONIC,
-      }
+      url: "https://polygon.g.alchemy.com/v2/" + process.env.ALCHEMY_API_KEY,
+      accounts: DEV_PK !== undefined ? [DEV_PK] : [],
     },
-
-    ganache: {
-      url: "http://127.0.0.1:8545",
-    }    
   },
   etherscan: {
     apiKey: {
       //polygon
       polygon: process.env.POLYGONSCAN_API_KEY,
       polygonMumbai: process.env.POLYGONSCAN_API_KEY,
-      mumbai: process.env.POLYGONSCAN_API_KEY,
 
       //ethereum
-      mainet: process.env.ETHERSCAN_API_KEY,
+      mainnet: process.env.ETHERSCAN_API_KEY,
       sepolia: process.env.ETHERSCAN_API_KEY,
+      goerli: process.env.ETHERSCAN_API_KEY,
     },
-    customChains: [
-      {
-        network: "polygonMumbai",
-        chainId: 80001,
-        urls: {
-          apiURL: "https://api-testnet.polygonscan.com/api",
-          browserURL: "https://mumbai.polygonscan.com"
-        }
-      }
-    ] 
-  }
+  },
 };
-

@@ -1,0 +1,12 @@
+{
+  "name": "SnowballBeta #1",
+  "description": "This is lorem ipsum",
+  "external_url": "https://nftstorage.link/ipfs/bafybeidwhcjctg2vrmh2st64hfl2qltxmoxspqi4inj6myfohevzc3nysy",
+  "image": "https://bafybeidwhcjctg2vrmh2st64hfl2qltxmoxspqi4inj6myfohevzc3nysy.ipfs.nftstorage.link/2.png",
+  "attributes": [
+    {
+      "trait_type": "Color",
+      "value": "green"
+    }
+  ]
+}
