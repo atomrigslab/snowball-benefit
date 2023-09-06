@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
 /**
@@ -9,7 +9,7 @@ pragma solidity ^0.8.18;
 
 //import "hardhat/console.sol";
 
-contract SnowballBenefit {
+contract SnowballBenefitV1 {
 
     uint32 private _benefitId;
     uint64 private _usageId;

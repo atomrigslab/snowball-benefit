@@ -41,7 +41,7 @@ describe("Snowball-benefit tests", function () {
  
   beforeEach(async function () {
     Contract = await ethers.getContractFactory("SnowballBenefit");
-    [owner, relayer, operator1, user1] = await ethers.getSigners();
+    [owner, relayer, operator1, user1, user1new] = await ethers.getSigners();
 
      //beacon proxy
     beacon = await upgrades.deployBeacon(Contract);
@@ -133,6 +133,31 @@ describe("Snowball-benefit tests", function () {
     console.log(sig);
     return { record, sig, contract };
   } 
+
+  async function delegateSigFixture() {
+    let [ name, version, chainId, verifyingContract ] = await contract.getDomainInfo();
+    chainId = parseInt(chainId);
+    let sourceAddr = user1.address;
+    let targetAddr = user1new.address;
+
+    let deadline = Math.floor(Date.now() / 1000) + 60*60*24; //1day    
+    let nonce = parseInt(await (contract.nonces(sourceAddr)));    
+    
+    let domain = { name, version, chainId, verifyingContract };
+    let types = { Delegate: [
+                            {name: 'sourceAddr', type: 'address'},
+                            {name: 'targetAddr', type: 'address'},
+                            {name: 'deadline', type: 'uint256'},
+                            {name: 'nonce', type: 'uint256'}                                                                                 
+                          ]};
+    let delegate = { sourceAddr, targetAddr, deadline, nonce };
+    let sig = await user1.signTypedData(domain, types, delegate);
+    //console.log(domain);
+    //console.log(types);
+    //console.log(usage);
+    console.log(sig);
+    return { delegate, sig, contract };
+  } 
   
   async function benefitFixture() {
     let chainId = 1;
@@ -206,7 +231,26 @@ describe("Snowball-benefit tests", function () {
     expect(verificationResult).to.be.false;
   });  
 
-  
+  it("verifyDelgateSig should be verified", async function () {
+
+    let { delegate, sig, contract } = await loadFixture(delegateSigFixture);
+    let u = delegate;
+    //console.log(u);
+    //console.log(sig);
+    let verificationResult = await contract.verifyDelegateSig(u.sourceAddr, u.targetAddr, u.deadline, u.nonce, sig);
+    expect(verificationResult).to.be.true;
+  });    
+
+  it("verifyDelgateSig should not be verified when any element changed", async function () {
+
+    let { delegate, sig, contract } = await loadFixture(delegateSigFixture);
+    let u = delegate;
+    //console.log(u);
+    //console.log(sig);
+    let verificationResult = await contract.verifyDelegateSig(u.sourceAddr, u.targetAddr, u.deadline, 100, sig);
+    expect(verificationResult).to.be.false;
+  });    
+
   it("registerBenefit() should work", async function () {
     let chainId = 1;
     let nftContract = '0x6466514368A0c2E1396BC3164495c6f90cBA92F6';
@@ -297,7 +341,83 @@ describe("Snowball-benefit tests", function () {
     let usage1 = await contract.usages(1);
     console.log(usage1);
     expect(usage1[0]).to.equal(1);
-  });      
+  });
+  
+  it("realyDelegate() should work", async function () {
+    let { delegate, sig, contract } = await loadFixture(delegateSigFixture);
+    let d = delegate;
+    //console.log(d);
+    await contract.relayDelegate(d.sourceAddr, d.targetAddr, d.deadline, d.nonce, sig)
+    let delegate1 = await contract.delegates(d.sourceAddr);
+    console.log(delegate1);
+    expect(delegate1[0]).to.equal(d.targetAddr);
+  }); 
+  
+  it("realyDelegate() should not work when an element changed", async function () {
+    let { delegate, sig, contract } = await loadFixture(delegateSigFixture);
+    let d = delegate;
+    //console.log(d);
+    await expect(contract.relayDelegate(d.sourceAddr, d.targetAddr, d.deadline, 100, sig))
+    .to.be.revertedWithCustomError(contract, "UserNonceError");
+  });  
+
+  it("realyDelegate() should not work when relacing before DELEGATE_TIME_LOCK", async function () {
+    let { delegate, sig, contract } = await loadFixture(delegateSigFixture);
+    let d = delegate;
+    //console.log(d);
+    await contract.relayDelegate(d.sourceAddr, d.targetAddr, d.deadline, d.nonce, sig);
+
+    let [ name, version, chainId, verifyingContract ] = await contract.getDomainInfo();
+    chainId = parseInt(chainId);
+    let sourceAddr = user1.address;
+    let targetAddr = user1new.address;
+
+    let deadline = Math.floor(Date.now() / 1000) + 60*60*24; //1day    
+    let nonce = parseInt(await (contract.nonces(sourceAddr)));    
+    
+    let domain = { name, version, chainId, verifyingContract };
+    let types = { Delegate: [
+                            {name: 'sourceAddr', type: 'address'},
+                            {name: 'targetAddr', type: 'address'},
+                            {name: 'deadline', type: 'uint256'},
+                            {name: 'nonce', type: 'uint256'}                                                                                 
+                          ]};
+    let delegate2 = { sourceAddr, targetAddr, deadline, nonce };
+    let sig2 = await user1.signTypedData(domain, types, delegate2);
+    await expect(contract.relayDelegate(sourceAddr, targetAddr, deadline, nonce, sig2))
+    .to.be.revertedWithCustomError(contract, "DelegateTimeLockNotPassed");
+  });   
+
+  it("realyDelegate() should work when relacing after DELEGATE_TIME_LOCK", async function () {
+    let { delegate, sig, contract } = await loadFixture(delegateSigFixture);
+    let d = delegate;
+    //console.log(d);
+    await contract.relayDelegate(d.sourceAddr, d.targetAddr, d.deadline, d.nonce, sig);
+
+    let [ name, version, chainId, verifyingContract ] = await contract.getDomainInfo();
+    chainId = parseInt(chainId);
+    let sourceAddr = user1.address;
+    let targetAddr = user1new.address;
+
+    let deadline = Math.floor(Date.now() / 1000) + 60*60*24*4; //4day    
+    let nonce = parseInt(await (contract.nonces(sourceAddr)));    
+    
+    let domain = { name, version, chainId, verifyingContract };
+    let types = { Delegate: [
+                            {name: 'sourceAddr', type: 'address'},
+                            {name: 'targetAddr', type: 'address'},
+                            {name: 'deadline', type: 'uint256'},
+                            {name: 'nonce', type: 'uint256'}                                                                                 
+                          ]};
+    let delegate2 = { sourceAddr, targetAddr, deadline, nonce };
+    let sig2 = await user1.signTypedData(domain, types, delegate2);
+
+    let newTimestamp = Math.floor(Date.now() / 1000) + 60*60*24*3 + 10; //3days
+    await time.increaseTo(newTimestamp);
+
+    await expect(contract.relayDelegate(sourceAddr, targetAddr, deadline, nonce, sig2))
+    .not.to.be.reverted;
+  });  
 });
 
 
