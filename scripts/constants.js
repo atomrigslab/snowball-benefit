@@ -4,8 +4,16 @@ const GAS_URLS = Object.freeze({
 });
 
 const TRANSACTION_CONFIG = Object.freeze({
+  account: {
+    length: 42,
+    prefix: "0x",
+  },
   block: {
     confirmation: 6, // recommended over 5 for contract verification
+  },
+  gas: {
+    matic: "https://gasstation.polygon.technology/v2", // Polygon Pos Mainet
+    mumbai: "https://gasstation-testnet.polygon.technology/v2", // Polygon Mumbai
   },
 });
 
@@ -48,6 +56,10 @@ const CONTRACT_ADDRESS = Object.freeze({
   testNft: {
     goerli: "0x70007e08a396B88cB5Abaac612fcB99D2eE3822D",
     mumbai: {
+      benefit: {
+        proxy: "0x55605f0a6bC988f4407182c57a51aD2d4b913c85",
+        impl: "0xD856a511fCA2C50c5218043c38ab319543518b5b",
+      },
       multiMint: "0x17Fef6d026C92A01baF624B991ac2Ea45D5b64D8",
       forDev: "0x3108E52EFF7d18DA5A54C62c0c3163835309BEEA",
       alpha: "0x9F6acc9878b931Bf882720AeAed9e47E81350B6a",
@@ -55,6 +67,25 @@ const CONTRACT_ADDRESS = Object.freeze({
       gamma: "0x5b8A0e300F88723639FF5949e509F0cDB74010CC",
     },
   },
+});
+
+const WALLET_ADDRESS = Object.freeze({
+  wallet: {
+    metamask: {
+      jake: "0xb3a0Cc498E0120aC6CA9919FD699f3a4b52730a1",
+    },
+    dekey: {
+      jimmy: "0xD62201F549Aa135C2Db7cBCF6850B818c72730f5",
+      saul: "0x8341F92326eBEc9646AA19CbfdF89FEb9e5eE658",
+      lucy: "0x33fC81FA29CEfA58Edc55a3B4622FbCE576d426E",
+      seby: "0xc775674dB00456e2971995A0dda48e0622fE4Bef",
+    },
+  },
+});
+
+const SERVER_URL = Object.freeze({
+  relayer:
+    "https://z4h3ubiei2uonyxvcgxiyt3rkq0omtvn.lambda-url.ap-northeast-2.on.aws",
 });
 
 module.exports = {
