@@ -10,7 +10,7 @@ const TRANSACTION_CONFIG = Object.freeze({
 });
 
 const METADATA_URLS = Object.freeze({
-  gateway: {
+  erc721: {
     alpha: {
       image:
         "https://nftstorage.link/ipfs/bafybeigrfgup4dtxekqzxavz377ufetk4ebjmgdhd7ep2eckjb5ryhgzlq",
@@ -48,6 +48,7 @@ const CONTRACT_ADDRESS = Object.freeze({
   testNft: {
     goerli: "0x70007e08a396B88cB5Abaac612fcB99D2eE3822D",
     mumbai: {
+      multiMint: "0x17Fef6d026C92A01baF624B991ac2Ea45D5b64D8",
       forDev: "0x3108E52EFF7d18DA5A54C62c0c3163835309BEEA",
       alpha: "0x9F6acc9878b931Bf882720AeAed9e47E81350B6a",
       beta: "0x529D30F5d2C9F4E76Fc4d28B9495179B50b9c221",
