@@ -3,13 +3,14 @@ pragma solidity ^0.8.18;
 
 interface ISnowBallMint {
     function mint(address to) external returns (uint256);
+    function safeMint(address to) external;
 }
 
 /// @dev call mint for 3 different nft contracts. used for easier wagmi ui integration
 contract SnowBallMultiMint {
-    address public _SNOWBALL_ALPHA = 0x2C93C564D8a2cC1e5A0F609c1F2f58f1eE9CDc55;
-    address public _SNOWBALL_BETA = 0xc8043F9911dEdaa3e611389C6989DFB89cC3b530;
-    address public _SNOWBALL_GAMMA = 0x4362572aacdDBcb7E95f98A41CC467F804e0DB1A;
+    address public _SNOWBALL_ALPHA = 0x9F6acc9878b931Bf882720AeAed9e47E81350B6a;
+    address public _SNOWBALL_BETA = 0x529D30F5d2C9F4E76Fc4d28B9495179B50b9c221;
+    address public _SNOWBALL_GAMMA = 0x5b8A0e300F88723639FF5949e509F0cDB74010CC;
 
     enum NftIndex {
         ALPHA, // starts with 0
@@ -45,7 +46,20 @@ contract SnowBallMultiMint {
         }
     }
 
+    function multiSafeMint(address recipient) public {
+        address[3] memory nftLists = [_SNOWBALL_ALPHA, _SNOWBALL_BETA, _SNOWBALL_GAMMA];
+
+        for (uint256 index = 0; index < nftLists.length; index++) {
+            ISnowBallMint targetNft = ISnowBallMint(nftLists[index]);
+            targetNft.safeMint(recipient);
+        }
+    }
+
     function getCurrentNfts() public view returns(address, address, address) {
         return (_SNOWBALL_ALPHA, _SNOWBALL_BETA, _SNOWBALL_GAMMA);
+    }
+
+    function getMultiMintVersion() public view returns(uint256) {
+        return 2;
     }
 }
