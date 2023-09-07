@@ -2,15 +2,15 @@
 pragma solidity ^0.8.18;
 
 interface ISnowBallMint {
-    function mint(address to) external returns (uint256);
+    function mint(address recipient, uint256 tokenId) external;
     function safeMint(address to) external;
 }
 
 /// @dev call mint for 3 different nft contracts. used for easier wagmi ui integration
 contract SnowBallMultiMint {
-    address public _SNOWBALL_ALPHA = 0x9F6acc9878b931Bf882720AeAed9e47E81350B6a;
-    address public _SNOWBALL_BETA = 0x529D30F5d2C9F4E76Fc4d28B9495179B50b9c221;
-    address public _SNOWBALL_GAMMA = 0x5b8A0e300F88723639FF5949e509F0cDB74010CC;
+    address public _SNOWBALL_ALPHA = 0x33BcF67a9bd45C392cf9D0a1184856Cb8A946aC9;
+    address public _SNOWBALL_BETA = 0xF197658408a7CAb109E791004499519FB6d0082b;
+    address public _SNOWBALL_GAMMA = 0x4cC58D6E19525036D44a60Db9442D969BD3d22e9;
 
     enum NftIndex {
         ALPHA, // starts with 0
@@ -32,26 +32,17 @@ contract SnowBallMultiMint {
         }
     }
 
-    function singleMint(address nft, address recipient) public {
+    function singleMint(address nft, address recipient, uint256 tokenId) public {
         ISnowBallMint targetNft = ISnowBallMint(nft);
-        targetNft.mint(recipient);
+        targetNft.mint(recipient, tokenId);
     }
 
-    function multiMint(address recipient) public {
+    function multiMint(address recipient, uint256 tokenId) public {
         address[3] memory nftLists = [_SNOWBALL_ALPHA, _SNOWBALL_BETA, _SNOWBALL_GAMMA];
 
         for (uint256 index = 0; index < nftLists.length; index++) {
             ISnowBallMint targetNft = ISnowBallMint(nftLists[index]);
-            targetNft.mint(recipient);
-        }
-    }
-
-    function multiSafeMint(address recipient) public {
-        address[3] memory nftLists = [_SNOWBALL_ALPHA, _SNOWBALL_BETA, _SNOWBALL_GAMMA];
-
-        for (uint256 index = 0; index < nftLists.length; index++) {
-            ISnowBallMint targetNft = ISnowBallMint(nftLists[index]);
-            targetNft.safeMint(recipient);
+            targetNft.mint(recipient, tokenId);
         }
     }
 
@@ -59,7 +50,7 @@ contract SnowBallMultiMint {
         return (_SNOWBALL_ALPHA, _SNOWBALL_BETA, _SNOWBALL_GAMMA);
     }
 
-    function getMultiMintVersion() public view returns(uint256) {
-        return 2;
+    function getMultiMintVersion() public pure returns(uint256) {
+        return 3;
     }
 }
