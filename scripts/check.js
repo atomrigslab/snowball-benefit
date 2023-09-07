@@ -1,20 +1,38 @@
 //@dev node scripts for minor checks
 
-const { CONTRACT_ADDRESS } = require("./constants");
+require("dotenv").config({ path: "../.env" });
+
+const { ethers } = require("hardhat");
+const ALPHA_ABI = require("./asset/abi/snowball-alpha.json");
 const { useMetadataFetch } = require("./hook");
 
-const tokenId = 0; // @dev minted by tokenid 1
+const { ALCHEMY_MUMBAI_KEY, DEV_PK } = process.env;
 
-// alchemy NFT api response check
+function getRandomInt() {
+  const max = 9;
+  return Math.floor(Math.random() * max);
+}
 
-// useMetadataFetch(CONTRACT_ADDRESS.testNft.mumbai.alpha, tokenId).then(
-//   console.log
-// );
+// base uri change test
+const provider = new ethers.AlchemyProvider("matic-mumbai", ALCHEMY_MUMBAI_KEY);
+const signer = new ethers.Wallet(DEV_PK, provider);
 
-// useMetadataFetch(CONTRACT_ADDRESS.testNft.mumbai.beta, tokenId).then(
-//   console.log
-// );
+console.log(provider._network.name);
+console.log(signer.address);
 
-useMetadataFetch(CONTRACT_ADDRESS.testNft.mumbai.gamma, tokenId).then(
-  console.log
-);
+// test circling token URI with alchemy api
+const tokenIds = {
+  zero: 0, // 0
+  first: 1, // 1
+  second: 2, // 2
+  eleven: 11, // 2
+  fifteen: 15, // 6 => ok
+  fifty: 50, // 5 => ok
+};
+
+const targetContract = "0x33BcF67a9bd45C392cf9D0a1184856Cb8A946aC9";
+const targetTokenId = 11;
+
+useMetadataFetch(targetContract, targetTokenId).then((res) => {
+  console.log(res.media);
+});

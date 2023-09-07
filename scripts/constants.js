@@ -19,35 +19,10 @@ const TRANSACTION_CONFIG = Object.freeze({
 
 const METADATA_URLS = Object.freeze({
   erc721: {
-    alpha: {
+    gateway: {
       image:
-        "https://nftstorage.link/ipfs/bafybeigrfgup4dtxekqzxavz377ufetk4ebjmgdhd7ep2eckjb5ryhgzlq",
-      json: {
-        ipfsHash:
-          "ipfs://bafybeih6wduczxy75akqcgudpeuaclfulg3yq5trfwgoqbaw4oq74mac7e",
-        gateway:
-          "https://nftstorage.link/ipfs/bafybeih6wduczxy75akqcgudpeuaclfulg3yq5trfwgoqbaw4oq74mac7e",
-      },
-    },
-    beta: {
-      image:
-        "https://nftstorage.link/ipfs/bafybeidwhcjctg2vrmh2st64hfl2qltxmoxspqi4inj6myfohevzc3nysy",
-      json: {
-        ipfsHash:
-          "ipfs://bafybeiceg6vp5onjvaktapui4gznfsqm67r6fosqh56zc3bzbjztrqkrm4",
-        gateway:
-          "https://nftstorage.link/ipfs/bafybeiceg6vp5onjvaktapui4gznfsqm67r6fosqh56zc3bzbjztrqkrm4",
-      },
-    },
-    gamma: {
-      image:
-        "https://nftstorage.link/ipfs/bafybeibrc4byd76pexpi4gugqzfeoisojkpegxoo5r6bcb7mheyfum54s4",
-      json: {
-        ipfsHash:
-          "ipfs://bafybeiaoiplgpgp47yjberimrlfwzeeay3rcput2ddgt6ebttfn4q4ojfa",
-        gateway:
-          "https://nftstorage.link/ipfs/bafybeiaoiplgpgp47yjberimrlfwzeeay3rcput2ddgt6ebttfn4q4ojfa",
-      },
+        "https://nftstorage.link/ipfs/bafybeiekqquf63jiah4vnoni4tnboqn4s6srbnuo7taj2ambdtbj2b4efe",
+      json: "https://nftstorage.link/ipfs/bafybeihxd5qpifeu65jerjqlix52ca5tqqdwdtwduq3vub66azw2czdaba",
     },
   },
 });
@@ -61,10 +36,10 @@ const CONTRACT_ADDRESS = Object.freeze({
         impl: "0xD856a511fCA2C50c5218043c38ab319543518b5b",
       },
       multiMint: "0xE0484D22b66651FcAc0665bA5410f8118b8f24e7",
-      forDev: "0x3108E52EFF7d18DA5A54C62c0c3163835309BEEA",
-      alpha: "0x9F6acc9878b931Bf882720AeAed9e47E81350B6a",
-      beta: "0x529D30F5d2C9F4E76Fc4d28B9495179B50b9c221",
-      gamma: "0x5b8A0e300F88723639FF5949e509F0cDB74010CC",
+      forDev: "0x89DdF63b152048109C88F0E89722F0729a9D87C8",
+      alpha: "0x33BcF67a9bd45C392cf9D0a1184856Cb8A946aC9",
+      beta: "",
+      gamma: "",
     },
   },
 });
