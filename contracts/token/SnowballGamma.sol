@@ -2,18 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract SnowballGamma is ERC721 {
-    using Counters for Counters.Counter;
     using Strings for uint256;
 
-    Counters.Counter private _tokenIdCounter;
-    
     string private _BASE_URI = "";
 
     constructor() ERC721("SnowballGamma", "SBG") {
-        setBaseURI("ipfs://bafybeiaoiplgpgp47yjberimrlfwzeeay3rcput2ddgt6ebttfn4q4ojfa");
+        setBaseURI("ipfs://bafybeihxd5qpifeu65jerjqlix52ca5tqqdwdtwduq3vub66azw2czdaba");
     }
 
     function setBaseURI(string memory _newURI) public {
@@ -31,17 +27,22 @@ contract SnowballGamma is ERC721 {
     function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
         _requireMinted(tokenId);
 
+        // return circling tokenURI
         string memory baseURI = _baseURI();
-        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, "/", tokenId.toString(), ".json")) : "";
+        uint256 targetId = _getRemainders(tokenId);
+
+        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, "/", targetId.toString(), ".json")) : "";
     }
 
-    function safeMint(address to) public  {
-        uint256 tokenId = _tokenIdCounter.current();
-        _tokenIdCounter.increment();
-        _safeMint(to, tokenId);
+    function mint(address recipient, uint256 tokenId) public {
+        _safeMint(recipient, tokenId);
     }
 
-    function getGammaVersion() public view returns(uint256) {
-        return 1; 
+    function _getRemainders(uint256 _tokenId) internal pure returns(uint256) {
+        return _tokenId % 9;
+    }
+
+    function getGammaVersion() public pure returns(uint256) {
+        return 3; 
     }
 }
