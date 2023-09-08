@@ -32,8 +32,14 @@ const CONTRACT_ADDRESS = Object.freeze({
     goerli: "0x70007e08a396B88cB5Abaac612fcB99D2eE3822D",
     mumbai: {
       benefit: {
-        proxy: "0x55605f0a6bC988f4407182c57a51aD2d4b913c85",
-        impl: "0xD856a511fCA2C50c5218043c38ab319543518b5b",
+        v1 : {
+          proxy: "0x55605f0a6bC988f4407182c57a51aD2d4b913c85",
+          impl: "0xD856a511fCA2C50c5218043c38ab319543518b5b",
+        },
+        v2 : {
+          proxy: "0xFB77746070676db34f7D23D0F2e09577d0f00Ae8", 
+          impl: '0x8739917ED4168F776747038f43f2f11418a9CFF9'
+        },
       },
       multiMint: "0x11118e3e23D4b0e015F672B2E448fF28970fd6Ad",
       forDev: "0x89DdF63b152048109C88F0E89722F0729a9D87C8",
