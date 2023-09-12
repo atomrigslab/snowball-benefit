@@ -22,6 +22,38 @@ function splitSig(sig) {
 
 }
 
+async function getDelegateSourceList(contract, targetAddr) {
+  const filter = contract.filters.Delegated(null, targetAddr)
+  const events = await contract.queryFilter(filter)
+  const sourceAddrList = []
+  for (const event of events) {
+    const sourceAddr = event.args.sourceAddr
+    const currentTargetAddr = (await contract.delegates(sourceAddr))[0]
+    if (currentTargetAddr === targetAddr) {
+      sourceAddrList.push(sourceAddr)
+    }
+  }
+  return sourceAddrList;
+};
+
+async function getStaffList(contract, operator) {
+  const filter = contract.filters.StaffChanged(operator, null);
+  const events = await contract.queryFilter(filter);
+  const staffList = []
+  const staffDict = {}  
+  for (const event of events) {
+    const staff = event.args.staff
+    if (!staffDict[staff]) {
+      const staffIsActive = await contract.staffs(operator, staff)
+      if (staffIsActive) {
+        staffDict[staff] = true
+        staffList.push(staff);
+      }
+    } 
+  }
+  return staffList;
+};
+
 describe("Snowball-benefit tests", function () {
 
   let Contract;
@@ -33,7 +65,7 @@ describe("Snowball-benefit tests", function () {
   let beacon;
  
   beforeEach(async function () {
-    Contract = await ethers.getContractFactory("SnowballBenefitV2");
+    Contract = await ethers.getContractFactory("SnowballBenefit");
     [owner, relayer, operator1, user1, user1new] = await ethers.getSigners();
 
      //beacon proxy
@@ -184,7 +216,7 @@ describe("Snowball-benefit tests", function () {
     await expect(contract.connect(operator1).recordUsage(
       p.user, p.benefitId, p.nftId, p.deadline, p.nonce, p.sig))
       .to.emit(contract, "BenefitUsed")
-      .withArgs(p.benefitId, 1, p.user);
+      .withArgs(p.benefitId, 1, p.user, p.user);
     let usage1 = await contract.usages(1);
     console.log(usage1);
     expect(usage1[0]).to.equal(1);
@@ -197,7 +229,7 @@ describe("Snowball-benefit tests", function () {
     await expect(contract.connect(relayer).relayRecordUsage(
       p.user, p.benefitId, p.nftId, p.deadline, p.nonce, p.sig, p.operator, p.opDeadline, p.opNonce, p.opSig))
       .to.emit(contract, "BenefitUsed")
-      .withArgs(p.benefitId, 1, p.user);
+      .withArgs(p.benefitId, 1, p.user, p.user);
 
       let usage1 = await contract.usages(1);
     //console.log(usage1);
@@ -213,6 +245,7 @@ describe("Snowball-benefit tests", function () {
 
     let delegate = await contract.delegates(sourceAddr);
     expect(delegate[0]).to.equal(targetAddr);
+    console.log('sourceAddrs', await getDelegateSourceList(contract, targetAddr));
   });
 
   it("relayDelegate() should work", async function () {
@@ -289,7 +322,7 @@ describe("Snowball-benefit tests", function () {
     let { nftChainId, nftContract, expiration, maxUsage, content } = await benefitParams();
     await contract.connect(operator1).registerBenefit(nftChainId, nftContract, expiration, maxUsage, content);
 
-    let user = targetAddr; 
+    let user = sourceAddr; 
     let benefitId = 1;
     let nftId = 100;
     let deadline = Math.floor(Date.now() / 1000) + 60*60*24*5; //5day    
@@ -304,7 +337,7 @@ describe("Snowball-benefit tests", function () {
     await expect(contract.connect(operator1).recordUsage(
       user, benefitId, nftId, deadline, nonce, sig))
       .to.emit(contract, "BenefitUsed")
-      .withArgs(benefitId, 1, user);
+      .withArgs(benefitId, 1, user, targetAddr);
     let usage1 = await contract.usages(1);
     console.log(usage1);
     expect(usage1[0]).to.equal(1);    
@@ -317,6 +350,8 @@ describe("Snowball-benefit tests", function () {
 
     let staffIsActive = await contract.staffs(operator1.address, user1new.address);
     expect(staffIsActive).to.equal(true);
+
+    console.log(await getStaffList(contract, operator1.address));
   });
 
   it("chageStaff should work for making a staff inactive", async function () {
@@ -355,7 +390,7 @@ describe("Snowball-benefit tests", function () {
     await expect(contract.connect(user1new).recordUsage(
       p.user, p.benefitId, p.nftId, p.deadline, p.nonce, p.sig))
       .to.emit(contract, "BenefitUsed")
-      .withArgs(p.benefitId, 1, p.user);
+      .withArgs(p.benefitId, 1, p.user, p.user);
     let usage1 = await contract.usages(1);
     console.log(usage1);
     expect(usage1[0]).to.equal(1);

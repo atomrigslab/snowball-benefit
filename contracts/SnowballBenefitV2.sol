@@ -10,7 +10,7 @@ pragma solidity ^0.8.18;
 import "hardhat/console.sol";
 import { Relayable } from "./Relayable.sol";
 
-contract SnowballBenefitV2 is Relayable {
+contract SnowballBenefit is Relayable {
 
     error DelegateTimeLockNotPassed(uint256 timeLeft);
     error NotOwnerError();
@@ -56,9 +56,9 @@ contract SnowballBenefitV2 is Relayable {
     mapping(address => mapping(address => bool)) public staffs; //operator addr => (staff addr => bool)
 
     event BenefitRegistered(address nftContract, uint32 benefitId);
-    event BenefitUsed(uint32 benefitId, uint64 usageId, address user);
-    event Delegated(address indexed sourceAddr, address targetAddr);
-    event StaffChanged(address indexed operator, address staff, bool isActive);
+    event BenefitUsed(uint32 benefitId, uint64 usageId, address user, address signer);
+    event Delegated(address indexed sourceAddr, address indexed targetAddr);
+    event StaffChanged(address indexed operator, address indexed staff, bool isActive);
 
     function initialize() public initializer() {
         if (owner() != address(0)) {
@@ -220,7 +220,7 @@ contract SnowballBenefitV2 is Relayable {
         usageIdsByUser[user].push(_usageId);
         usageCount[benefitId][nftId]++;
         _nonces[user]++;
-        emit BenefitUsed(benefitId, _usageId, user);
+        emit BenefitUsed(benefitId, _usageId, user, signer);
     }    
 
     function recordUsage(

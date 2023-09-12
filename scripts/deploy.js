@@ -24,6 +24,7 @@ const getFeeOption = async () => {
 
 //wait for n blocks
 const waitBlocks = async (n) => {
+  const provider = ethers.provider;
   const currentBlock = await provider.getBlockNumber()
   const targetBlock = currentBlock + n
   return new Promise((resolve, reject) => {

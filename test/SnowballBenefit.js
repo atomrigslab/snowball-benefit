@@ -40,7 +40,7 @@ describe("Snowball-benefit tests", function () {
   let beacon;
  
   beforeEach(async function () {
-    Contract = await ethers.getContractFactory("SnowballBenefit");
+    Contract = await ethers.getContractFactory("SnowballBenefitV1");
     [owner, relayer, operator1, user1, user1new] = await ethers.getSigners();
 
      //beacon proxy
