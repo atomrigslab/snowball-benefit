@@ -7,7 +7,7 @@ pragma solidity ^0.8.18;
  *
  **/
 
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 import { Relayable } from "./Relayable.sol";
 
 contract SnowballBenefit is Relayable {
@@ -31,7 +31,8 @@ contract SnowballBenefit is Relayable {
         uint32 expiration;
         uint8 maxUsage;
         address operator;
-        string content;       
+        string content;
+        uint32 createdAt;       
     }    
 
     struct Usage {
@@ -39,11 +40,12 @@ contract SnowballBenefit is Relayable {
         uint32 benefitId;
         uint32 nftId;
         address user;
+        uint32 createdAt;
     }
 
     struct Delegate {
         address targetAddr;
-        uint32 timestamp;
+        uint32 createdAt;
     }
 
     mapping(uint32 => Benefit) public benefits; //benefitId => Benefit
@@ -55,8 +57,8 @@ contract SnowballBenefit is Relayable {
     mapping(address => Delegate) public delegates; //nft holder address => Delegate (targetAddr, timestamp)
     mapping(address => mapping(address => bool)) public staffs; //operator addr => (staff addr => bool)
 
-    event BenefitRegistered(address nftContract, uint32 benefitId);
-    event BenefitUsed(uint32 benefitId, uint64 usageId, address user, address signer);
+    event BenefitRegistered(address indexed nftContract, uint32 benefitId);
+    event BenefitUsed(uint32 indexed benefitId, uint64 usageId, address user, address indexed signer);
     event Delegated(address indexed sourceAddr, address indexed targetAddr);
     event StaffChanged(address indexed operator, address indexed staff, bool isActive);
 
@@ -100,7 +102,8 @@ contract SnowballBenefit is Relayable {
                 expiration,
                 maxUsage,
                 operator,
-                content
+                content,
+                uint32(block.timestamp)
             );
         benefitIdsByNft[nftContract].push(_benefitId);
         emit BenefitRegistered(nftContract, _benefitId);
@@ -160,20 +163,7 @@ contract SnowballBenefit is Relayable {
             content,
             operator
         );
-        /*
-        uint256 paramHash = keccak256(
-            abi.encodePacked(
-                chainId, 
-                nftContract,
-                expiration,
-                maxUsage,
-                abi.encodePacked(content),
-                operator
-            )
-        );
-        */
-
-        
+     
         address signer = getSigner('relayRegisterBenefit', paramHash, deadline, nonce, sig);
         if (operator != signer) {
             revert SignerMatchError(signer);
@@ -215,7 +205,8 @@ contract SnowballBenefit is Relayable {
                 _usageId,
                 benefitId,
                 nftId,
-                user
+                user,
+                uint32(block.timestamp)
             );
         usageIdsByUser[user].push(_usageId);
         usageCount[benefitId][nftId]++;
@@ -279,8 +270,8 @@ contract SnowballBenefit is Relayable {
 
         Delegate memory existing = delegates[sourceAddr];
         if (existing.targetAddr != address(0)) {
-            if(uint256(existing.timestamp) + DELEGATE_TIME_LOCK > block.timestamp) {
-                revert DelegateTimeLockNotPassed(uint256(existing.timestamp) + DELEGATE_TIME_LOCK - block.timestamp);
+            if(uint256(existing.createdAt) + DELEGATE_TIME_LOCK > block.timestamp) {
+                revert DelegateTimeLockNotPassed(uint256(existing.createdAt) + DELEGATE_TIME_LOCK - block.timestamp);
             }
         }
 
