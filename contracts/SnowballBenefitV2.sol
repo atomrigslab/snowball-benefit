@@ -40,6 +40,7 @@ contract SnowballBenefit is Relayable {
         uint32 benefitId;
         uint32 nftId;
         address user;
+        address signer;
         uint32 createdAt;
     }
 
@@ -58,9 +59,9 @@ contract SnowballBenefit is Relayable {
     mapping(address => mapping(address => bool)) public staffs; //operator addr => (staff addr => bool)
 
     event BenefitRegistered(address indexed nftContract, uint32 benefitId);
-    event BenefitUsed(uint32 indexed benefitId, uint64 usageId, address user, address indexed signer);
-    event Delegated(address indexed sourceAddr, address indexed targetAddr);
-    event StaffChanged(address indexed operator, address indexed staff, bool isActive);
+    event BenefitUsed(uint32 indexed benefitId, uint64 usageId);
+    event Delegated(address sourceAddr, address indexed targetAddr);
+    event StaffChanged(address indexed operator, address staff, bool isActive);
 
     function initialize() public initializer() {
         if (owner() != address(0)) {
@@ -206,12 +207,13 @@ contract SnowballBenefit is Relayable {
                 benefitId,
                 nftId,
                 user,
+                signer,
                 uint32(block.timestamp)
             );
         usageIdsByUser[user].push(_usageId);
         usageCount[benefitId][nftId]++;
         _nonces[user]++;
-        emit BenefitUsed(benefitId, _usageId, user, signer);
+        emit BenefitUsed(benefitId, _usageId);
     }    
 
     function recordUsage(

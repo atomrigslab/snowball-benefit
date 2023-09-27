@@ -136,6 +136,7 @@ describe("Snowball-benefit tests", function () {
     let { domain, types, relayData } = await getTypedData(contract, funcName, paramHash, deadline, nonce);
     let sig = await user1.signTypedData(domain, types, relayData);
     let params = { user, benefitId, nftId, deadline, nonce, sig };
+    //console.log('usageSig ', params)
     return { params, contract };
   } 
 
@@ -216,7 +217,7 @@ describe("Snowball-benefit tests", function () {
     await expect(contract.connect(operator1).recordUsage(
       p.user, p.benefitId, p.nftId, p.deadline, p.nonce, p.sig))
       .to.emit(contract, "BenefitUsed")
-      .withArgs(p.benefitId, 1, p.user, p.user);
+      .withArgs(p.benefitId, 1);
     let usage1 = await contract.usages(1);
     console.log(usage1);
     expect(usage1[0]).to.equal(1);
@@ -229,7 +230,7 @@ describe("Snowball-benefit tests", function () {
     await expect(contract.connect(relayer).relayRecordUsage(
       p.user, p.benefitId, p.nftId, p.deadline, p.nonce, p.sig, p.operator, p.opDeadline, p.opNonce, p.opSig))
       .to.emit(contract, "BenefitUsed")
-      .withArgs(p.benefitId, 1, p.user, p.user);
+      .withArgs(p.benefitId, 1);
 
       let usage1 = await contract.usages(1);
     //console.log(usage1);
@@ -337,7 +338,7 @@ describe("Snowball-benefit tests", function () {
     await expect(contract.connect(operator1).recordUsage(
       user, benefitId, nftId, deadline, nonce, sig))
       .to.emit(contract, "BenefitUsed")
-      .withArgs(benefitId, 1, user, targetAddr);
+      .withArgs(benefitId, 1);
     let usage1 = await contract.usages(1);
     console.log(usage1);
     expect(usage1[0]).to.equal(1);    
@@ -390,7 +391,7 @@ describe("Snowball-benefit tests", function () {
     await expect(contract.connect(user1new).recordUsage(
       p.user, p.benefitId, p.nftId, p.deadline, p.nonce, p.sig))
       .to.emit(contract, "BenefitUsed")
-      .withArgs(p.benefitId, 1, p.user, p.user);
+      .withArgs(p.benefitId, 1);
     let usage1 = await contract.usages(1);
     console.log(usage1);
     expect(usage1[0]).to.equal(1);
