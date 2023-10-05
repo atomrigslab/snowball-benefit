@@ -18,6 +18,7 @@ contract SnowballBenefit is Relayable {
     error AlreadyInitiazlizedError();
     error NotOperatorError();
     error ExceedMaxUsageError();
+    error UserNonceError(uint256 given, uint256 expected);
     error SignerMatchError(address signer);
 
     uint32 private _benefitId;
@@ -156,6 +157,10 @@ contract SnowballBenefit is Relayable {
         uint256 nonce,  
         bytes memory sig
         ) external {
+
+        if (nonce != _nonces[operator]) {
+            revert UserNonceError(nonce, _nonces[operator]);
+        }  
         bytes32 paramHash = getBenefitParamHash(
             chainId, 
             nftContract,
@@ -186,6 +191,10 @@ contract SnowballBenefit is Relayable {
         if (usageCount[benefitId][nftId] == benefit.maxUsage) {
             revert ExceedMaxUsageError();
         }
+
+        if (nonce != _nonces[user]) {
+            revert UserNonceError(nonce, _nonces[user]);
+        }  
 
         bytes32 paramHash = keccak256(
             abi.encodePacked(
@@ -247,6 +256,10 @@ contract SnowballBenefit is Relayable {
         bytes memory opSig
         ) external {
 
+
+        if (opNonce != _nonces[operator]) {
+            revert UserNonceError(opNonce, _nonces[operator]);
+        } 
         Benefit memory benefit = benefits[benefitId];
         bytes32 paramHash = keccak256(
             abi.encodePacked(
@@ -293,6 +306,10 @@ contract SnowballBenefit is Relayable {
         bytes memory sig
     ) external {
 
+        if (nonce != _nonces[sourceAddr]) {
+            revert UserNonceError(nonce, _nonces[sourceAddr]);
+        }  
+
         bytes32 paramHash = keccak256(
             abi.encodePacked(
                 sourceAddr, 
@@ -324,6 +341,10 @@ contract SnowballBenefit is Relayable {
         uint256 nonce,
         bytes memory sig
     ) external {
+
+        if (nonce != _nonces[operator]) {
+            revert UserNonceError(nonce, _nonces[operator]);
+        }  
 
         bytes32 paramHash = keccak256(
             abi.encodePacked(

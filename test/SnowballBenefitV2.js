@@ -423,7 +423,7 @@ describe("Snowball-benefit tests", function () {
     let benefitId = 1;
     let nftId = 100;
     let deadline = Math.floor(Date.now() / 1000) + 60*60*24*5; //5day    
-    let nonce = parseInt(await (contract.nonces(user)));    
+    let nonce = parseInt(await (contract.nonces(targetAddr)));    
     let funcName = 'recordUsage';
     let paramHash = ethers.solidityPackedKeccak256(
       ["address", "uint32", "uint32"],

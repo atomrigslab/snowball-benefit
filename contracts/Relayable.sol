@@ -19,7 +19,6 @@ abstract contract Relayable is Initializable {
      */
     error OwnableUnauthorizedAccount(address account);
     error DeadlineExpiredError();
-    error UserNonceError(uint256 given, uint256 expected);
     error SigMismatchError();
     error InvalidSigLengthError();
 
@@ -154,9 +153,10 @@ abstract contract Relayable is Initializable {
           v += 27;
         }
         address signer = ecrecover(hash, v, r, s);
-        if (nonce != _nonces[signer]) {
-            revert UserNonceError(nonce, _nonces[signer]);
-        }      
+        //for delegated signer, use sourceAddr's nonce
+        //if (nonce != _nonces[signer]) {
+        //    revert UserNonceError(nonce, _nonces[signer]);
+        //}      
         return signer;
     }
 }
