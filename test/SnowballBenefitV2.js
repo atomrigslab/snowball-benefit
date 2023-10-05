@@ -67,6 +67,10 @@ describe("Snowball-benefit tests", function () {
   beforeEach(async function () {
     Contract = await ethers.getContractFactory("SnowballBenefit");
     [owner, relayer, operator1, user1, user1new] = await ethers.getSigners();
+    //relayer = 0xf35ad8c30C9c4c15C38b69fcCDF0D254E3fB82Bd
+    //operator1 = 0x51830607c523834e8e9645DaC16b7cF2e5Df03d7
+    //user1 = 0x352726ed589c8CcA7432a6E7610B9C509740B7b2
+    //user1new = 0x7c13D5d3B4431F30001fF5FE2876C7d582C4c0B
 
      //beacon proxy
     beacon = await upgrades.deployBeacon(Contract);
@@ -232,7 +236,7 @@ describe("Snowball-benefit tests", function () {
       .to.emit(contract, "BenefitUsed")
       .withArgs(p.benefitId, 1);
 
-      let usage1 = await contract.usages(1);
+    let usage1 = await contract.usages(1);
     //console.log(usage1);
     expect(usage1[0]).to.equal(1);
   });
@@ -406,6 +410,49 @@ describe("Snowball-benefit tests", function () {
     .to.be.revertedWithCustomError(contract, "NotOperatorError");
   });
 
+  it("delegated user's usage sig relayed by a relayer should work", async function () {
+
+    let sourceAddr = user1.address;
+    let targetAddr = user1new.address;
+    await contract.connect(user1).delegate(targetAddr);
+
+    let { nftChainId, nftContract, expiration, maxUsage, content } = await benefitParams();
+    await contract.connect(operator1).registerBenefit(nftChainId, nftContract, expiration, maxUsage, content);
+
+    let user = sourceAddr; 
+    let benefitId = 1;
+    let nftId = 100;
+    let deadline = Math.floor(Date.now() / 1000) + 60*60*24*5; //5day    
+    let nonce = parseInt(await (contract.nonces(user)));    
+    let funcName = 'recordUsage';
+    let paramHash = ethers.solidityPackedKeccak256(
+      ["address", "uint32", "uint32"],
+      [user, benefitId, nftId]);
+    let { domain, types, relayData } = await getTypedData(contract, funcName, paramHash, deadline, nonce);
+    let sig = await user1new.signTypedData(domain, types, relayData);
+
+    //params = { user, benefitId, nftId, deadline, nonce, sig }
+
+    let operator = operator1.address; 
+    let opDeadline = Math.floor(Date.now() / 1000) + 60*60*24; //1day    
+    let opNonce = parseInt(await (contract.nonces(operator)));    
+    let funcName2 = 'relayRecordUsage';
+    let paramHash2 = ethers.solidityPackedKeccak256(
+      ["uint32", "address"],
+      [benefitId, operator]);
+    
+    let d = await getTypedData(contract, funcName2, paramHash2, opDeadline, opNonce);    
+    let opSig = await operator1.signTypedData(d.domain, d.types, d.relayData);
+
+    await expect(contract.connect(relayer).relayRecordUsage(
+      user, benefitId, nftId, deadline, nonce, sig, operator, opDeadline, opNonce, opSig))
+      .to.emit(contract, "BenefitUsed")
+      .withArgs(benefitId, 1);
+
+    let usage1 = await contract.usages(1);
+    //console.log(usage1);
+    expect(usage1[0]).to.equal(1);    
+  });   
 });
 
 
